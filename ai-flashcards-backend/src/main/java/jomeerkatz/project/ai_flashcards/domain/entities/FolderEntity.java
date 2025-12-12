@@ -13,31 +13,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "cards")
-public class Card {
+@Table(name = "folders")
+public class FolderEntity {
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "card_seq")
-    @SequenceGenerator(name = "card_seq", sequenceName = "card_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "folder_seq")
+    @SequenceGenerator(name = "folder_seq", sequenceName = "folder_sequence", allocationSize = 1)
     private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "folder_id", nullable = false)
-    private Folder folder;
-
-    @Column(name = "question", nullable = false)
-    private String question;
-
-    @Column(name = "answer", nullable = false)
-    private String answer;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private CardStatus status;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
