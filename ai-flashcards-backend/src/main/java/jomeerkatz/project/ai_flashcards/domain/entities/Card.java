@@ -1,6 +1,7 @@
 package jomeerkatz.project.ai_flashcards.domain.entities;
 
 import jakarta.persistence.*;
+import jomeerkatz.project.ai_flashcards.domain.enums.CardStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "cards")
-public class CardEntity {
+public class Card {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "card_seq")
@@ -23,11 +24,11 @@ public class CardEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "folder_id", nullable = false)
-    private FolderEntity folder;
+    private Folder folder;
 
     @Column(name = "question", nullable = false)
     private String question;

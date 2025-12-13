@@ -1,4 +1,4 @@
-package jomeerkatz.project.ai_flashcards.domain.entities;
+package jomeerkatz.project.ai_flashcards.domain.enums;
 
 public enum CardStatus {
     GOOD,
