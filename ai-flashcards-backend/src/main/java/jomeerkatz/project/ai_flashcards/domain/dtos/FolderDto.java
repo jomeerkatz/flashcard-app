@@ -15,6 +15,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FolderDto {
     private Long id;
-
     private String name;
 }

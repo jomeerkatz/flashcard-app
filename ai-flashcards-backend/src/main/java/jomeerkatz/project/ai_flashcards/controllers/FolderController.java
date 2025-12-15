@@ -31,12 +31,4 @@ public class FolderController {
         Folder savedFolder = folderService.createFolder(newUser, folderCreateUpdateRequest);
         return ResponseEntity.ok(folderMapper.toFolderDto(savedFolder));
     }
-
-    private User jwtToUser(Jwt jwt) {
-        return User.builder()
-                .keycloakId(jwt.getSubject())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-    }
 }
