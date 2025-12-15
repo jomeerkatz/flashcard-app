@@ -4,6 +4,7 @@ import jomeerkatz.project.ai_flashcards.domain.FolderCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.dtos.FolderDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
+import jomeerkatz.project.ai_flashcards.exceptions.FolderAlreadyExistsException;
 import jomeerkatz.project.ai_flashcards.exceptions.UserNotFoundException;
 import jomeerkatz.project.ai_flashcards.mappers.FolderMapper;
 import jomeerkatz.project.ai_flashcards.repositories.FolderRepository;
@@ -22,24 +23,26 @@ public class FolderServiceImpl implements FolderService {
     private final FolderMapper foldermapper;
 
     @Override
-    public FolderDto createFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest) {
-        // todo: check if user even exists or something else also handle if user is new. idk how
-        // we can have the situation of user already exists or so
-        // however if user doesnt exists throw custom exception
-        // check if user exsists
-        Folder newFolder = Folder.builder()
-                .user(user)
-                .name(folderCreateUpdateRequest.getName())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+    public Folder createFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest) {
+        User savedUser = getUserOrThrow(user);
 
-        Folder savedFolder = folderRepository.save(newFolder);
-        return foldermapper.toFolderDto(savedFolder);
+        boolean folderExistsForUser =  folderRepository
+                .existsByUserIdAndName(savedUser.getId(), folderCreateUpdateRequest.getName());
+
+        if(!folderExistsForUser) {
+            return folderRepository.save(Folder.builder()
+                            .name(folderCreateUpdateRequest.getName())
+                            .user(savedUser)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                    .build());
+        } else {
+            throw new FolderAlreadyExistsException("folder with name " + folderCreateUpdateRequest.getName() + " already exists!")
+        }
     }
 
     private User getUserOrThrow(User user) {
         return userRepository.findById(user.getId()).orElseThrow(
-                () -> new UserNotFoundException("folder can't get created for user with id " + user.getId()));
+                () -> new UserNotFoundException("folder can't get created for user with id " + user.getId() + " because user doesn't exists!"));
     }
 }

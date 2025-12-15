@@ -21,8 +21,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createOrFindUser(UserCreateUpdateRequest userCreateUpdateRequest) {
-        String keycloakId = userCreateUpdateRequest.getKeycloakId();
+    public User createOrFindUser(User user) {
+        String keycloakId = user.getKeycloakId();
         try {
             return userRepository.findByKeycloakId(keycloakId).orElseGet(() ->
                     userRepository.save(
