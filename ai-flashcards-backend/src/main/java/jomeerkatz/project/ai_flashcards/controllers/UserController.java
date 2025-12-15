@@ -4,6 +4,7 @@ import jomeerkatz.project.ai_flashcards.domain.dtos.UserDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
 import jomeerkatz.project.ai_flashcards.mappers.UserMapper;
 import jomeerkatz.project.ai_flashcards.services.UserService;
+import jomeerkatz.project.ai_flashcards.utility.JwtMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,15 +25,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(@AuthenticationPrincipal Jwt jwt) {
-        User newUser = jwtToUser(jwt);
+        User newUser = JwtMapper.toUser(jwt);
         return ResponseEntity.ok(userMapper.toUserDto(userService.createOrFindUser(newUser)));
-    }
-
-    private User jwtToUser(Jwt jwt) {
-        return User.builder()
-                .keycloakId(jwt.getSubject())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
     }
 }
