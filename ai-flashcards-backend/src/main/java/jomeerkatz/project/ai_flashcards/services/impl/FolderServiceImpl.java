@@ -37,7 +37,7 @@ public class FolderServiceImpl implements FolderService {
                             .updatedAt(LocalDateTime.now())
                     .build());
         } else {
-            throw new FolderAlreadyExistsException("folder with name " + folderCreateUpdateRequest.getName() + " already exists!")
+            throw new FolderAlreadyExistsException("folder with name " + folderCreateUpdateRequest.getName() + " already exists!");
         }
     }
 
