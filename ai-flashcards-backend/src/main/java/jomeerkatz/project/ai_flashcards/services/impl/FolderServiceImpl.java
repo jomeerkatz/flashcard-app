@@ -11,9 +11,17 @@ import jomeerkatz.project.ai_flashcards.repositories.FolderRepository;
 import jomeerkatz.project.ai_flashcards.repositories.UserRepository;
 import jomeerkatz.project.ai_flashcards.services.FolderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 @AllArgsConstructor
 @Service
 public class FolderServiceImpl implements FolderService {
@@ -41,8 +49,14 @@ public class FolderServiceImpl implements FolderService {
         }
     }
 
+    @Override
+    public Page<Folder> getAllFolders(User user, Pageable pageable) {
+        User savedUser = getUserOrThrow(user);
+        return folderRepository.findAllByUserId(savedUser.getId(), pageable);
+    }
+
     private User getUserOrThrow(User user) {
-        return userRepository.findById(user.getId()).orElseThrow(
-                () -> new UserNotFoundException("folder can't get created for user with id " + user.getId() + " because user doesn't exists!"));
+       return userRepository.findByKeycloakId(user.getKeycloakId())
+               .orElseThrow(() -> new UserNotFoundException("User not found with keycloak id!"));
     }
 }
