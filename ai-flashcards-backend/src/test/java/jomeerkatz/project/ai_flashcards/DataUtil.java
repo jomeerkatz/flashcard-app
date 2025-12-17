@@ -1,7 +1,9 @@
 package jomeerkatz.project.ai_flashcards;
 
+import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
+import jomeerkatz.project.ai_flashcards.domain.enums.CardStatus;
 
 import java.time.LocalDateTime;
 
@@ -47,6 +49,42 @@ public class DataUtil {
                 .name(folderTestName)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static Card getCardExample1(User user, Folder folder) {
+        return Card.builder()
+                .user(user)
+                .folder(folder)
+                .question("this is a test question 1")
+                .answer("this is a test answer 1")
+                .status(CardStatus.BAD)
+                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static Card getCardExample2(User user, Folder folder) {
+        return Card.builder()
+                .user(user)
+                .folder(folder)
+                .question("this is a test question 2")
+                .answer("this is a test answer 2")
+                .status(CardStatus.BAD)
+                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static Card getCardExample3(User user, Folder folder) {
+        return Card.builder()
+                .user(user)
+                .folder(folder)
+                .question("this is a test question 3")
+                .answer("this is a test answer 3")
+                .status(CardStatus.BAD)
+                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

@@ -3,6 +3,7 @@ package jomeerkatz.project.ai_flashcards.services.impl;
 import jakarta.transaction.Transactional;
 import jomeerkatz.project.ai_flashcards.domain.UserCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
+import jomeerkatz.project.ai_flashcards.exceptions.UserNotFoundException;
 import jomeerkatz.project.ai_flashcards.repositories.UserRepository;
 import jomeerkatz.project.ai_flashcards.services.UserService;
 import lombok.AllArgsConstructor;
@@ -39,4 +40,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public User getUserOrThrow(User user) {
+        return userRepository.findByKeycloakId(user.getKeycloakId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with keycloak id!"));
+    }
 }

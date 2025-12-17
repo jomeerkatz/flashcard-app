@@ -29,3 +29,6 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toUserDto(userService.createOrFindUser(newUser)));
     }
 }
+
+
+// todo: refactor ideas: using just the user endpoint for creating, delete, update folders and also cards

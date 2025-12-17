@@ -30,8 +30,8 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/">
               <h1 className="text-xl font-bold text-white tracking-tight cursor-pointer hover:text-orange-500 transition-colors duration-200">
-                AI Flashcards
-              </h1>
+              AI Flashcards
+            </h1>
             </Link>
           </div>
 

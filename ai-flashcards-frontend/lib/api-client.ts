@@ -1,5 +1,6 @@
 import { UserDto } from "@/types/user";
 import { FolderDto, PageResponse } from "@/types/folder";
+import { CardDto } from "@/types/card";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
@@ -161,6 +162,70 @@ export async function createFolder(
 
     const folderData: FolderDto = await response.json();
     return folderData;
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}
+
+/**
+ * Fetches all cards for a specific folder with pagination.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder
+ * @param page - The page number (0-indexed), defaults to 0
+ * @param size - The number of items per page, defaults to 10
+ * @returns The paginated card data from the backend
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function getAllCardsOfFolder(
+  accessToken: string,
+  folderId: number,
+  page: number = 0,
+  size: number = 10
+): Promise<PageResponse<CardDto>> {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/folders/${folderId}?page=${page}&size=${size}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to fetch cards: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Folder not found.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    const cardData: PageResponse<CardDto> = await response.json();
+    return cardData;
   } catch (error) {
     // Re-throw ApiError as-is
     if (error && typeof error === "object" && "message" in error) {

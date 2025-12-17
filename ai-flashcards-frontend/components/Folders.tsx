@@ -2,11 +2,13 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getAllFolders, createFolder } from "@/lib/api-client";
 import { FolderDto, PageResponse } from "@/types/folder";
 
 export default function Folders() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [folders, setFolders] = useState<PageResponse<FolderDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -171,6 +173,7 @@ export default function Folders() {
               {folders.content.map((folder) => (
                 <button
                   key={folder.id}
+                  onClick={() => router.push(`/folders/${folder.id}`)}
                   className="px-6 py-8 bg-slate-900 border-2 border-slate-800 hover:border-orange-500 text-white text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
                   aria-label={`Folder: ${folder.name}`}
                 >

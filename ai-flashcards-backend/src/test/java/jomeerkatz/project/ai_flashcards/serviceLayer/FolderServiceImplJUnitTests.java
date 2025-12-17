@@ -79,7 +79,7 @@ public class FolderServiceImplJUnitTests {
                 .thenReturn(expectedFolder);
 
         // Act
-        Folder result = folderService.createFolder(testUser, folderRequest);
+        Folder result = folderService.saveFolder(testUser, folderRequest);
 
         // Assert
         assertThat(result).isNotNull();
@@ -97,7 +97,7 @@ public class FolderServiceImplJUnitTests {
                 .thenReturn(true);
 
         // Act & Assert
-        assertThatThrownBy(() -> folderService.createFolder(testUser, folderRequest))
+        assertThatThrownBy(() -> folderService.saveFolder(testUser, folderRequest))
                 .isInstanceOf(FolderAlreadyExistsException.class)
                 .hasMessageContaining(folderRequest.getName())
                 .hasMessageContaining("already exists");
@@ -110,7 +110,7 @@ public class FolderServiceImplJUnitTests {
                 .thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> folderService.createFolder(testUser, folderRequest))
+        assertThatThrownBy(() -> folderService.saveFolder(testUser, folderRequest))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("doesn't exists");
     }

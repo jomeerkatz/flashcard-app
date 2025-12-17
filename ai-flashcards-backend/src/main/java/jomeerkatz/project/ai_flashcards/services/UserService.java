@@ -6,5 +6,5 @@ import jomeerkatz.project.ai_flashcards.domain.entities.User;
 
 public interface UserService {
     User createOrFindUser(User user);
-
+    User getUserOrThrow(User user);
 }

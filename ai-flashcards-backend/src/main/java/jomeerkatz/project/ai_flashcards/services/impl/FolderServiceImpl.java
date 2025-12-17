@@ -11,6 +11,7 @@ import jomeerkatz.project.ai_flashcards.mappers.FolderMapper;
 import jomeerkatz.project.ai_flashcards.repositories.FolderRepository;
 import jomeerkatz.project.ai_flashcards.repositories.UserRepository;
 import jomeerkatz.project.ai_flashcards.services.FolderService;
+import jomeerkatz.project.ai_flashcards.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,11 +29,11 @@ import java.util.Optional;
 public class FolderServiceImpl implements FolderService {
 
     private final FolderRepository folderRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
-    public Folder createFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest) {
-        User savedUser = getUserOrThrow(user);
+    public Folder saveFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest) {
+        User savedUser = userService.getUserOrThrow(user);
 
         boolean folderExistsForUser =  folderRepository
                 .existsByUserIdAndName(savedUser.getId(), folderCreateUpdateRequest.getName());
@@ -51,12 +52,7 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public Page<Folder> getAllFolders(User user, Pageable pageable) {
-        User savedUser = getUserOrThrow(user);
+        User savedUser = userService.getUserOrThrow(user);
         return folderRepository.findAllByUserId(savedUser.getId(), pageable);
-    }
-
-    private User getUserOrThrow(User user) {
-       return userRepository.findByKeycloakId(user.getKeycloakId())
-               .orElseThrow(() -> new UserNotFoundException("User not found with keycloak id!"));
     }
 }
