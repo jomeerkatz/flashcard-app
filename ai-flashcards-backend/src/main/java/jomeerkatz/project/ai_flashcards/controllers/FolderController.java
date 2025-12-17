@@ -1,6 +1,8 @@
 package jomeerkatz.project.ai_flashcards.controllers;
 
+import jakarta.validation.Valid;
 import jomeerkatz.project.ai_flashcards.domain.FolderCreateUpdateRequest;
+import jomeerkatz.project.ai_flashcards.domain.dtos.FolderCreateUpdateRequestDto;
 import jomeerkatz.project.ai_flashcards.domain.dtos.FolderDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
@@ -33,8 +35,9 @@ public class FolderController {
     private final FolderMapper folderMapper;
 
     @PostMapping
-    public ResponseEntity<FolderDto> createFolder(@AuthenticationPrincipal Jwt jwt, FolderCreateUpdateRequest folderCreateUpdateRequest) {
+    public ResponseEntity<FolderDto> createFolder(@AuthenticationPrincipal Jwt jwt, @Valid FolderCreateUpdateRequestDto folderCreateUpdateRequestDto) {
         User newUser = JwtMapper.toUser(jwt);
+        FolderCreateUpdateRequest folderCreateUpdateRequest = folderMapper.toFolderCreateUpdateRequest(folderCreateUpdateRequestDto);
         Folder savedFolder = folderService.createFolder(newUser, folderCreateUpdateRequest);
         return ResponseEntity.ok(folderMapper.toFolderDto(savedFolder));
     }
