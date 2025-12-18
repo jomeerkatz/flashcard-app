@@ -58,6 +58,15 @@ public class FolderController {
         return cardService.getAllCards(JwtMapper.toUser(jwt), folderId, pageable).map(cardMapper::toDto);
     }
 
+    @PutMapping(path = "/{folderId}")
+    public ResponseEntity<Void> updateFolder(@AuthenticationPrincipal Jwt jwt,
+                                             @PathVariable(name="folderId") Long folderId,
+                                             @Valid @RequestBody FolderCreateUpdateRequestDto folderCreateUpdateRequestDto) {
+        User user = JwtMapper.toUser(jwt);
+        folderService.updateFolder(user, folderId, folderMapper.toFolderCreateUpdateRequest(folderCreateUpdateRequestDto));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping(path = "/{folderId}/cards")
     public ResponseEntity<CardDto> createCard(
             @AuthenticationPrincipal Jwt jwt,

@@ -4,9 +4,8 @@ import jomeerkatz.project.ai_flashcards.domain.FolderCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.dtos.FolderDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
+import jomeerkatz.project.ai_flashcards.exceptions.*;
 import jomeerkatz.project.ai_flashcards.exceptions.FolderAlreadyExistsException;
-import jomeerkatz.project.ai_flashcards.exceptions.FolderAlreadyExistsException;
-import jomeerkatz.project.ai_flashcards.exceptions.UserNotFoundException;
 import jomeerkatz.project.ai_flashcards.mappers.FolderMapper;
 import jomeerkatz.project.ai_flashcards.repositories.FolderRepository;
 import jomeerkatz.project.ai_flashcards.repositories.UserRepository;
@@ -35,15 +34,15 @@ public class FolderServiceImpl implements FolderService {
     public Folder saveFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest) {
         User savedUser = userService.getUserOrThrow(user);
 
-        boolean folderExistsForUser =  folderRepository
+        boolean folderExistsForUser = folderRepository
                 .existsByUserIdAndName(savedUser.getId(), folderCreateUpdateRequest.getName());
 
-        if(!folderExistsForUser) {
+        if (!folderExistsForUser) {
             return folderRepository.save(Folder.builder()
-                            .name(folderCreateUpdateRequest.getName())
-                            .user(savedUser)
-                            .createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now())
+                    .name(folderCreateUpdateRequest.getName())
+                    .user(savedUser)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
                     .build());
         } else {
             throw new FolderAlreadyExistsException("folder with name " + folderCreateUpdateRequest.getName() + " already exists!");
@@ -54,5 +53,25 @@ public class FolderServiceImpl implements FolderService {
     public Page<Folder> getAllFolders(User user, Pageable pageable) {
         User savedUser = userService.getUserOrThrow(user);
         return folderRepository.findAllByUserId(savedUser.getId(), pageable);
+    }
+
+    @Override
+    public void updateFolder(User user, Long folderId, FolderCreateUpdateRequest folderCreateUpdateRequest) {
+        User savedUser = userService.getUserOrThrow(user);
+
+        Folder folderToBeUpdated = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("folder does not exists by id " + folderId)
+        );
+
+        boolean folderExistsForUser = folderRepository
+                .existsByUserIdAndName(savedUser.getId(), folderToBeUpdated.getName());
+
+        if (!folderExistsForUser) {
+            // folder does not exist in combination of user and folder
+            throw new FolderAccessDeniedException("User has no access or folder does not exist!");
+        } else {
+            folderToBeUpdated.setName(folderCreateUpdateRequest.getName());
+            folderRepository.save(folderToBeUpdated);
+        }
     }
 }

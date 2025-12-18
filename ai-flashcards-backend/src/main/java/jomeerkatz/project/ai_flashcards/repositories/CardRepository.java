@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface CardRepository extends JpaRepository<Card, Long> {
     Page<Card> findAllByUserIdAndFolderId(Long userId, Long folderId, Pageable pageable);
     Optional<Card> findByIdAndFolderId(Long id, Long folderId);
+    void deleteAllByFolderId(Long folderId);
 }

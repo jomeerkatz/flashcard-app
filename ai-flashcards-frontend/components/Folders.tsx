@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAllFolders, createFolder } from "@/lib/api-client";
 import { FolderDto, PageResponse } from "@/types/folder";
+import EditFolderModal from "@/components/EditFolderModal";
 
 export default function Folders() {
   const { data: session, status } = useSession();
@@ -18,6 +19,8 @@ export default function Folders() {
   const [folderName, setFolderName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [editingFolder, setEditingFolder] = useState<FolderDto | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated" && session?.accessToken) {
@@ -99,6 +102,21 @@ export default function Folders() {
     }
   };
 
+  const handleOpenEditModal = (folder: FolderDto, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingFolder(folder);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingFolder(null);
+  };
+
+  const handleUpdateFolder = async () => {
+    await fetchFolders(currentPage);
+  };
+
   if (status === "loading") {
     return (
       <div className="flex-1 flex items-center justify-center py-20 px-4">
@@ -174,10 +192,29 @@ export default function Folders() {
                 <button
                   key={folder.id}
                   onClick={() => router.push(`/folders/${folder.id}`)}
-                  className="px-6 py-8 bg-slate-900 border-2 border-slate-800 hover:border-orange-500 text-white text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
+                  className="relative px-6 py-8 bg-slate-900 border-2 border-slate-800 hover:border-orange-500 text-white text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
                   aria-label={`Folder: ${folder.name}`}
                 >
-                  <h2 className="text-xl font-semibold">{folder.name}</h2>
+                  <h2 className="text-xl font-semibold pr-8">{folder.name}</h2>
+                  <button
+                    onClick={(e) => handleOpenEditModal(folder, e)}
+                    className="absolute top-4 right-4 text-slate-400 hover:text-orange-500 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black p-1 z-10"
+                    aria-label={`Edit folder: ${folder.name}`}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
                 </button>
               ))}
             </div>
@@ -308,6 +345,18 @@ export default function Folders() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Edit Folder Modal */}
+      {editingFolder && (
+        <EditFolderModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSuccess={handleUpdateFolder}
+          folderId={editingFolder.id}
+          accessToken={session?.accessToken || ""}
+          folder={editingFolder}
+        />
       )}
     </div>
   );

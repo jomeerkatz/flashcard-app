@@ -180,6 +180,64 @@ export async function createFolder(
 }
 
 /**
+ * Updates an existing folder for the authenticated user.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder to update
+ * @param name - The updated name of the folder
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function updateFolder(
+  accessToken: string,
+  folderId: number,
+  name: string
+): Promise<void> {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/folders/${folderId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ name }),
+    });
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to update folder: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Folder not found.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    // Response is 200 OK with no body (void)
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}
+
+/**
  * Fetches all cards for a specific folder with pagination.
  * @param accessToken - The JWT access token from Keycloak
  * @param folderId - The ID of the folder
