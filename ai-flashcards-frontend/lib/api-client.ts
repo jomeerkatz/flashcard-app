@@ -372,3 +372,63 @@ export async function updateCard(
     throw networkError;
   }
 }
+
+/**
+ * Deletes a card from a specific folder.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder
+ * @param cardId - The ID of the card to delete
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function deleteCard(
+  accessToken: string,
+  folderId: number,
+  cardId: number
+): Promise<void> {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/folders/${folderId}/cards/${cardId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to delete card: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Card or folder not found.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    // Response is 200 OK with no body (void)
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}

@@ -69,7 +69,7 @@ public class FolderController {
         return ResponseEntity.ok(cardMapper.toDto(cardService.createCard(user, folderId, cardCreateUpdateRequest)));
     }
 
-    @PutMapping(path = "/{folder}/cards/{cardId}")
+    @PutMapping(path = "/{folderId}/cards/{cardId}")
     public ResponseEntity<Void> updateCard(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable(name = "folderId") Long folderId,
@@ -79,6 +79,15 @@ public class FolderController {
         User user = JwtMapper.toUser(jwt);
         CardCreateUpdateRequest cardCreateUpdateRequest = cardMapper.toCardCreateUpdateRequest(cardCreateUpdateRequestDto);
         cardService.updateCard(user, folderId, cardCreateUpdateRequest, cardId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{folderId}/cards/{cardId}")
+    public ResponseEntity<Void> deleteCard(@AuthenticationPrincipal Jwt jwt,
+                      @PathVariable(name = "folderId") Long folderId,
+                      @PathVariable(name = "cardId") Long cardId) {
+        User user = JwtMapper.toUser(jwt);
+        cardService.deleteCard(user, folderId, cardId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

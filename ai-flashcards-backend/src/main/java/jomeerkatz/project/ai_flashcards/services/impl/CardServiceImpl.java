@@ -102,6 +102,29 @@ public class CardServiceImpl implements CardService {
             cardRepository.save(toBeUpdated);
         }
     }
+
+    @Override
+    public void deleteCard(User user, Long folderId, Long cardId) {
+        // request comes to backend
+        // we have to check, if the user is even existing bec without a user, we cant save it
+        User savedUser = userService.getUserOrThrow(user);
+
+        // if user exists, we have to check if the folder is existing too also
+        Folder savedFolder = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("Folder does not exists!")
+        );
+        // if folder is connected to user (user has access to the folder) - prevent random user create cards for folders
+        // if user exists, if folder exists, if user has access to folder...
+        boolean userHasAccessToFolder = folderRepository.existsByUserIdAndName(savedUser.getId(), savedFolder.getName());
+
+        if (!userHasAccessToFolder) {
+            throw new FolderAccessDeniedException("User has not access to the folder!");
+        } else {
+            Optional<Card> savedCard = cardRepository.findByIdAndFolderId(cardId, savedFolder.getId());
+            Card toBeDeleted = savedCard.orElseThrow(() -> new CardException("Card not existing or user has no access."));
+            cardRepository.deleteById(toBeDeleted.getId());
+        }
+    }
 }
 
 

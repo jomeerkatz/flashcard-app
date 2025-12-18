@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
@@ -9,12 +9,14 @@ import Footer from "@/components/Footer";
 import Cards from "@/components/Cards";
 import CreateCardModal from "@/components/CreateCardModal";
 import EditCardModal from "@/components/EditCardModal";
-import { getAllCardsOfFolder } from "@/lib/api-client";
+import DeleteCardModal from "@/components/DeleteCardModal";
+import { getAllCardsOfFolder, getAllFolders } from "@/lib/api-client";
 import { CardDto } from "@/types/card";
-import { PageResponse } from "@/types/folder";
+import { FolderDto, PageResponse } from "@/types/folder";
 
 export default function FolderCardsPage() {
   const params = useParams();
+  const router = useRouter();
   const { data: session, status } = useSession();
   const folderId = params?.folderId as string;
   const [cards, setCards] = useState<PageResponse<CardDto> | null>(null);
@@ -22,10 +24,13 @@ export default function FolderCardsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<CardDto | null>(null);
+  const [deletingCard, setDeletingCard] = useState<CardDto | null>(null);
+  const [folderName, setFolderName] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "authenticated" && session?.accessToken && folderId) {
       fetchCards();
+      fetchFolderName();
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
@@ -57,6 +62,29 @@ export default function FolderCardsPage() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFolderName = async () => {
+    if (!session?.accessToken || !folderId) return;
+
+    try {
+      const folderIdNum = parseInt(folderId, 10);
+      if (isNaN(folderIdNum)) {
+        return;
+      }
+      // Fetch all folders and find the one matching the folderId
+      // We'll fetch a large page size to ensure we get the folder
+      const foldersData = await getAllFolders(session.accessToken, 0, 100);
+      const folder = foldersData.content.find(
+        (f: FolderDto) => f.id === folderIdNum
+      );
+      if (folder) {
+        setFolderName(folder.name);
+      }
+    } catch (err) {
+      console.error("Failed to fetch folder name:", err);
+      // Don't set error state here, just log it
     }
   };
 
@@ -119,9 +147,31 @@ export default function FolderCardsPage() {
       <Suspense fallback={<div className="flex-1" />}>
         <div className="flex-1 py-12 px-4">
           <div className="container mx-auto max-w-6xl">
+            <button
+              onClick={() => router.push("/folders")}
+              className="mb-4 flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
+              aria-label="Back to folders"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span className="font-semibold uppercase tracking-wide text-sm">
+                Back to Folders
+              </span>
+            </button>
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
-                Cards
+                {folderName ? `Cards for Folder: ${folderName}` : "Cards"}
               </h1>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -147,6 +197,7 @@ export default function FolderCardsPage() {
               cards={cards?.content || []}
               loading={loading}
               onEdit={(card) => setEditingCard(card)}
+              onDelete={(card) => setDeletingCard(card)}
             />
           </div>
         </div>
@@ -170,6 +221,17 @@ export default function FolderCardsPage() {
               cardId={editingCard.id}
               accessToken={session.accessToken}
               card={editingCard}
+            />
+          )}
+          {deletingCard && (
+            <DeleteCardModal
+              isOpen={!!deletingCard}
+              onClose={() => setDeletingCard(null)}
+              onSuccess={fetchCards}
+              folderId={folderIdNum}
+              cardId={deletingCard.id}
+              accessToken={session.accessToken}
+              card={deletingCard}
             />
           )}
         </>
