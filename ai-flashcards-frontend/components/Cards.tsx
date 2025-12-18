@@ -5,9 +5,10 @@ import { CardDto, CardStatus } from "@/types/card";
 interface CardsProps {
   cards: CardDto[];
   loading?: boolean;
+  onEdit?: (card: CardDto) => void;
 }
 
-export default function Cards({ cards, loading }: CardsProps) {
+export default function Cards({ cards, loading, onEdit }: CardsProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 px-4">
@@ -49,6 +50,11 @@ export default function Cards({ cards, loading }: CardsProps) {
               <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wide">
                 cardstatus
               </th>
+              {onEdit && (
+                <th className="px-4 py-3 text-left text-sm font-semibold text-white uppercase tracking-wide">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -73,6 +79,29 @@ export default function Cards({ cards, loading }: CardsProps) {
                     {card.status}
                   </span>
                 </td>
+                {onEdit && (
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => onEdit(card)}
+                      className="text-orange-500 hover:text-orange-400 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black p-1"
+                      aria-label="Edit card"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -81,4 +110,3 @@ export default function Cards({ cards, loading }: CardsProps) {
     </div>
   );
 }
-

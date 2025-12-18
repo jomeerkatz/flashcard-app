@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Cards from "@/components/Cards";
 import CreateCardModal from "@/components/CreateCardModal";
+import EditCardModal from "@/components/EditCardModal";
 import { getAllCardsOfFolder } from "@/lib/api-client";
 import { CardDto } from "@/types/card";
 import { PageResponse } from "@/types/folder";
@@ -20,6 +21,7 @@ export default function FolderCardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCard, setEditingCard] = useState<CardDto | null>(null);
 
   useEffect(() => {
     if (status === "authenticated" && session?.accessToken && folderId) {
@@ -141,19 +143,36 @@ export default function FolderCardsPage() {
                 Create Card
               </button>
             </div>
-            <Cards cards={cards?.content || []} loading={loading} />
+            <Cards
+              cards={cards?.content || []}
+              loading={loading}
+              onEdit={(card) => setEditingCard(card)}
+            />
           </div>
         </div>
       </Suspense>
       <Footer />
       {session?.accessToken && folderIdNum && !isNaN(folderIdNum) && (
-        <CreateCardModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={fetchCards}
-          folderId={folderIdNum}
-          accessToken={session.accessToken}
-        />
+        <>
+          <CreateCardModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={fetchCards}
+            folderId={folderIdNum}
+            accessToken={session.accessToken}
+          />
+          {editingCard && (
+            <EditCardModal
+              isOpen={!!editingCard}
+              onClose={() => setEditingCard(null)}
+              onSuccess={fetchCards}
+              folderId={folderIdNum}
+              cardId={editingCard.id}
+              accessToken={session.accessToken}
+              card={editingCard}
+            />
+          )}
+        </>
       )}
     </div>
   );
