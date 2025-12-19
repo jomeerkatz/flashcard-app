@@ -10,6 +10,7 @@ import jomeerkatz.project.ai_flashcards.domain.dtos.FolderDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
+import jomeerkatz.project.ai_flashcards.domain.enums.CardStatus;
 import jomeerkatz.project.ai_flashcards.mappers.CardMapper;
 import jomeerkatz.project.ai_flashcards.mappers.FolderMapper;
 import jomeerkatz.project.ai_flashcards.services.CardService;
@@ -116,4 +117,25 @@ public class FolderController {
         cardService.deleteCard(user, folderId, cardId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping(path = "/{folderId}/learn-cards/{status}")
+    public Page<CardDto> getAlNextCardsForLearning(@AuthenticationPrincipal Jwt jwt,
+                                                   @PathVariable(name = "status") CardStatus status,
+                                                   @PathVariable(name = "folderId") Long folderId,
+                                                   @PageableDefault(size = 20, page = 0) Pageable pageable){
+        User user = JwtMapper.toUser(jwt);
+        return cardService.getCardsByStatus(user, folderId, status, pageable).map(cardMapper::toDto);
+    }
+
+    @PutMapping(path = "/{folderId}/update-learning-card/{cardId}/{status}")
+    public ResponseEntity<Void> updateCardStatus(@AuthenticationPrincipal Jwt jwt,
+                                                 @PathVariable(name = "status") CardStatus status,
+                                                 @PathVariable(name = "folderId") Long folderId,
+                                                 @PathVariable(name = "cardId") Long cardId){
+        User user = JwtMapper.toUser(jwt);
+
+        cardService.updatedCardStatus(user, folderId, cardId, status);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
 }

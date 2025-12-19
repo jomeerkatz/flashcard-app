@@ -11,7 +11,7 @@ import CreateCardModal from "@/components/CreateCardModal";
 import EditCardModal from "@/components/EditCardModal";
 import DeleteCardModal from "@/components/DeleteCardModal";
 import { getAllCardsOfFolder, getAllFolders } from "@/lib/api-client";
-import { CardDto } from "@/types/card";
+import { CardDto, CardStatus } from "@/types/card";
 import { FolderDto, PageResponse } from "@/types/folder";
 
 export default function FolderCardsPage() {
@@ -192,6 +192,31 @@ export default function FolderCardsPage() {
                 </svg>
                 Create Card
               </button>
+            </div>
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Learn Cards
+              </h2>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => router.push(`/folders/${folderId}/learn/${CardStatus.GOOD}`)}
+                  className="px-6 py-2.5 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm"
+                >
+                  Learn Good Cards
+                </button>
+                <button
+                  onClick={() => router.push(`/folders/${folderId}/learn/${CardStatus.MEDIUM}`)}
+                  className="px-6 py-2.5 bg-transparent border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm"
+                >
+                  Learn Medium Cards
+                </button>
+                <button
+                  onClick={() => router.push(`/folders/${folderId}/learn/${CardStatus.BAD}`)}
+                  className="px-6 py-2.5 bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm"
+                >
+                  Learn Bad Cards
+                </button>
+              </div>
             </div>
             <Cards
               cards={cards?.content || []}

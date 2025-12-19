@@ -150,6 +150,49 @@ public class CardServiceImpl implements CardService {
             return cardRepository.countByFolderId(savedFolder.getId());
         }
     }
+
+    @Override
+    public Page<Card> getCardsByStatus(User user, Long folderId, CardStatus status, Pageable pageable) {
+        // check if user even existing
+        User savedUser = userService.getUserOrThrow(user);
+
+        // get the actual folder, where data should get retrieved
+        Folder savedFolder = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("Folder does not exists!")
+        );
+
+        // check if the user has even access to the folder
+        boolean userHasAccessToFolder = folderRepository.existsByUserIdAndName(savedUser.getId(), savedFolder.getName());
+
+        if (!userHasAccessToFolder) {
+            throw new FolderAccessDeniedException("User has not access to the folder!");
+        } else {
+            return cardRepository.findAllByUserIdAndFolderIdAndStatus(savedUser.getId(), savedFolder.getId(), status, pageable);
+        }
+    }
+
+    @Override
+    public void updatedCardStatus(User user, Long folderId, Long cardId, CardStatus status) {
+        User savedUser = userService.getUserOrThrow(user);
+
+        // get the actual folder, where data should get retrieved
+        Folder savedFolder = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("Folder does not exists!")
+        );
+
+        // check if the user has even access to the folder
+        boolean userHasAccessToFolder = folderRepository.existsByUserIdAndName(savedUser.getId(), savedFolder.getName());
+
+        if (!userHasAccessToFolder) {
+            throw new FolderAccessDeniedException("User has not access to the folder!");
+        } else {
+            Optional<Card> savedCard = cardRepository.findByIdAndFolderId(cardId, savedFolder.getId());
+            Card toBeUpdated = savedCard.orElseThrow(() -> new CardException("Card not existing or user has no access."));
+            toBeUpdated.setStatus(status);
+            toBeUpdated.setUpdatedAt(LocalDateTime.now());
+            cardRepository.save(toBeUpdated);
+        }
+    }
 }
 
 

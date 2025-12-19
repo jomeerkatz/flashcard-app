@@ -1,6 +1,6 @@
 import { UserDto } from "@/types/user";
 import { FolderDto, PageResponse } from "@/types/folder";
-import { CardDto } from "@/types/card";
+import { CardDto, CardStatus } from "@/types/card";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
@@ -513,6 +513,134 @@ export async function deleteCard(
     if (!response.ok) {
       const error: ApiError = {
         message: `Failed to delete card: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Card or folder not found.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    // Response is 200 OK with no body (void)
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}
+
+/**
+ * Fetches cards for learning by status with pagination.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder
+ * @param status - The card status to filter by (GOOD, MEDIUM, BAD)
+ * @param page - The page number (0-indexed), defaults to 0
+ * @param size - The number of items per page, defaults to 20
+ * @returns The paginated card data from the backend
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function getCardsForLearning(
+  accessToken: string,
+  folderId: number,
+  status: CardStatus,
+  page: number = 0,
+  size: number = 20
+): Promise<PageResponse<CardDto>> {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/folders/${folderId}/learn-cards/${status}?page=${page}&size=${size}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to fetch cards for learning: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Folder not found.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    const cardData: PageResponse<CardDto> = await response.json();
+    return cardData;
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}
+
+/**
+ * Updates the status of a card during learning.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder
+ * @param cardId - The ID of the card to update
+ * @param status - The new status for the card (GOOD, MEDIUM, BAD)
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function updateCardStatus(
+  accessToken: string,
+  folderId: number,
+  cardId: number,
+  status: CardStatus
+): Promise<void> {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/folders/${folderId}/update-learning-card/${cardId}/${status}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to update card status: ${response.statusText}`,
         status: response.status,
       };
 

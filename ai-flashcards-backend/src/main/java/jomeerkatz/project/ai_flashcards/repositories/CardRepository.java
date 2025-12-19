@@ -1,6 +1,7 @@
 package jomeerkatz.project.ai_flashcards.repositories;
 
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
+import jomeerkatz.project.ai_flashcards.domain.enums.CardStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,5 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Optional<Card> findByIdAndFolderId(Long id, Long folderId);
     void deleteAllByFolderId(Long folderId);
     Long countByFolderId(Long folderId);
+    Page<Card> findAllByUserIdAndFolderIdAndStatus(Long userId, Long folderId, CardStatus status, Pageable pageable);
 }
