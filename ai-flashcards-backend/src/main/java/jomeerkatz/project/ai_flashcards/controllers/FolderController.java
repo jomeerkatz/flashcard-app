@@ -3,10 +3,7 @@ package jomeerkatz.project.ai_flashcards.controllers;
 import jakarta.validation.Valid;
 import jomeerkatz.project.ai_flashcards.domain.CardCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.FolderCreateUpdateRequest;
-import jomeerkatz.project.ai_flashcards.domain.dtos.CardCreateUpdateRequestDto;
-import jomeerkatz.project.ai_flashcards.domain.dtos.CardDto;
-import jomeerkatz.project.ai_flashcards.domain.dtos.FolderCreateUpdateRequestDto;
-import jomeerkatz.project.ai_flashcards.domain.dtos.FolderDto;
+import jomeerkatz.project.ai_flashcards.domain.dtos.*;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
@@ -27,6 +24,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/folders")
@@ -136,6 +135,20 @@ public class FolderController {
 
         cardService.updatedCardStatus(user, folderId, cardId, status);
         return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/{folderId}/cards/bulk")
+    public ResponseEntity<List<CardDto>> createBulkCards(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long folderId,
+            @Valid @RequestBody BulkCardCreateRequestDto request
+    ) {
+
+        User user = JwtMapper.toUser(jwt);
+
+        List<Card> savedCards = cardService.createCardsFromAi(user, folderId, cardMapper.toBulkCardCreateRequest(request));
+
+        return ResponseEntity.ok(savedCards.stream().map(cardMapper::toDto).toList());
     }
 
 }

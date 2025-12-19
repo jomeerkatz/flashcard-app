@@ -1,6 +1,8 @@
 package jomeerkatz.project.ai_flashcards.mappers;
 
+import jomeerkatz.project.ai_flashcards.domain.BulkCardCreateRequest;
 import jomeerkatz.project.ai_flashcards.domain.CardCreateUpdateRequest;
+import jomeerkatz.project.ai_flashcards.domain.dtos.BulkCardCreateRequestDto;
 import jomeerkatz.project.ai_flashcards.domain.dtos.CardCreateUpdateRequestDto;
 import jomeerkatz.project.ai_flashcards.domain.dtos.CardDto;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
@@ -11,4 +13,5 @@ import org.mapstruct.ReportingPolicy;
 public interface CardMapper {
     CardDto toDto(Card card);
     CardCreateUpdateRequest toCardCreateUpdateRequest(CardCreateUpdateRequestDto cardCreateUpdateRequestDto);
+    BulkCardCreateRequest toBulkCardCreateRequest(BulkCardCreateRequestDto bulkCardCreateRequestDto);
 }

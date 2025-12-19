@@ -1,6 +1,7 @@
 package jomeerkatz.project.ai_flashcards.services.impl;
 
 import jakarta.transaction.Transactional;
+import jomeerkatz.project.ai_flashcards.domain.BulkCardCreateRequest;
 import jomeerkatz.project.ai_flashcards.domain.CardCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -193,7 +196,36 @@ public class CardServiceImpl implements CardService {
             cardRepository.save(toBeUpdated);
         }
     }
+
+    @Override
+    public List<Card> createCardsFromAi(User user, Long folderId, BulkCardCreateRequest bulkCardCreateRequest) {
+
+        User savedUser = userService.getUserOrThrow(user);
+
+        // get the actual folder, where data should get retrieved
+        Folder savedFolder = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("Folder does not exists!")
+        );
+
+        // check if the user has even access to the folder
+        boolean userHasAccessToFolder = folderRepository.existsByUserIdAndName(savedUser.getId(), savedFolder.getName());
+
+        if (!userHasAccessToFolder) {
+            throw new FolderAccessDeniedException("User has not access to the folder!");
+        } else {
+            List<CardCreateUpdateRequest> cardsToBeSaved = bulkCardCreateRequest.getCards();
+            List<Card> cards = cardsToBeSaved.stream().map(currentCard ->
+                    Card.builder()
+                            .user(savedUser)
+                            .folder(savedFolder)
+                            .question(currentCard.getQuestion())
+                            .answer(currentCard.getAnswer())
+                            .status(CardStatus.BAD)
+                            .updatedAt(LocalDateTime.now())
+                            .createdAt(LocalDateTime.now())
+                            .build()).toList();
+
+            return cardRepository.saveAll(cards);
+        }
+    }
 }
-
-
-// todo: seems we have some boiler code here with getting user, getting folder, checking if folder and user is connected

@@ -30,10 +30,10 @@ public class Card {
     @JoinColumn(name = "folder_id", nullable = false)
     private Folder folder;
 
-    @Column(name = "question", nullable = false)
+    @Column(name = "question", nullable = false, columnDefinition = "TEXT")
     private String question;
 
-    @Column(name = "answer", nullable = false)
+    @Column(name = "answer", nullable = false, columnDefinition = "TEXT")
     private String answer;
 
     @Enumerated(EnumType.STRING)

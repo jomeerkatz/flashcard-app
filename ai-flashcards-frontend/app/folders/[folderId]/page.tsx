@@ -26,17 +26,27 @@ export default function FolderCardsPage() {
   const [editingCard, setEditingCard] = useState<CardDto | null>(null);
   const [deletingCard, setDeletingCard] = useState<CardDto | null>(null);
   const [folderName, setFolderName] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 10;
 
+  // Reset to first page when folder changes
   useEffect(() => {
     if (status === "authenticated" && session?.accessToken && folderId) {
-      fetchCards();
+      setCurrentPage(0);
       fetchFolderName();
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
   }, [status, session?.accessToken, folderId]);
 
-  const fetchCards = async () => {
+  // Fetch cards when page or folder changes
+  useEffect(() => {
+    if (status === "authenticated" && session?.accessToken && folderId) {
+      fetchCards(currentPage);
+    }
+  }, [status, session?.accessToken, folderId, currentPage]);
+
+  const fetchCards = async (page: number) => {
     if (!session?.accessToken || !folderId) return;
 
     try {
@@ -49,8 +59,8 @@ export default function FolderCardsPage() {
       const data = await getAllCardsOfFolder(
         session.accessToken,
         folderIdNum,
-        0,
-        10
+        page,
+        pageSize
       );
       setCards(data);
     } catch (err) {
@@ -62,6 +72,18 @@ export default function FolderCardsPage() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (cards && !cards.first) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (cards && !cards.last) {
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
@@ -127,7 +149,7 @@ export default function FolderCardsPage() {
               <p className="text-red-400 font-semibold">{error}</p>
             </div>
             <button
-              onClick={fetchCards}
+              onClick={() => fetchCards(currentPage)}
               className="px-6 py-2 bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black font-semibold transition-all duration-200"
             >
               Try Again
@@ -173,25 +195,46 @@ export default function FolderCardsPage() {
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {folderName ? `Cards for Folder: ${folderName}` : "Cards"}
               </h1>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="px-6 py-2.5 bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => router.push(`/folders/${folderId}/generate`)}
+                  className="px-6 py-2.5 bg-transparent border-2 border-cyan-500 text-cyan-500 hover:bg-cyan-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm flex items-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Create Card
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  Generate with AI
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-6 py-2.5 bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black uppercase tracking-wide text-sm flex items-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Create Card
+                </button>
+              </div>
             </div>
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">
@@ -224,6 +267,30 @@ export default function FolderCardsPage() {
               onEdit={(card) => setEditingCard(card)}
               onDelete={(card) => setDeletingCard(card)}
             />
+            {/* Pagination Controls */}
+            {cards && cards.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={cards.first}
+                  className="px-6 py-2 bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black disabled:border-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-600 font-semibold transition-all duration-200 uppercase tracking-wide text-sm"
+                  aria-label="Previous page"
+                >
+                  Previous
+                </button>
+                <span className="text-slate-400 font-medium">
+                  Page {cards.number + 1} of {cards.totalPages}
+                </span>
+                <button
+                  onClick={handleNextPage}
+                  disabled={cards.last}
+                  className="px-6 py-2 bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black disabled:border-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-600 font-semibold transition-all duration-200 uppercase tracking-wide text-sm"
+                  aria-label="Next page"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </Suspense>
@@ -233,7 +300,7 @@ export default function FolderCardsPage() {
           <CreateCardModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onSuccess={fetchCards}
+            onSuccess={() => fetchCards(currentPage)}
             folderId={folderIdNum}
             accessToken={session.accessToken}
           />
@@ -241,7 +308,7 @@ export default function FolderCardsPage() {
             <EditCardModal
               isOpen={!!editingCard}
               onClose={() => setEditingCard(null)}
-              onSuccess={fetchCards}
+              onSuccess={() => fetchCards(currentPage)}
               folderId={folderIdNum}
               cardId={editingCard.id}
               accessToken={session.accessToken}
@@ -252,7 +319,7 @@ export default function FolderCardsPage() {
             <DeleteCardModal
               isOpen={!!deletingCard}
               onClose={() => setDeletingCard(null)}
-              onSuccess={fetchCards}
+              onSuccess={() => fetchCards(currentPage)}
               folderId={folderIdNum}
               cardId={deletingCard.id}
               accessToken={session.accessToken}

@@ -17,6 +17,10 @@ The following environment variables are required:
 
 - `NEXT_PUBLIC_BACKEND_URL` - Backend API base URL (defaults to `http://localhost:8080` if not set)
 
+### AI Generation (OpenRouter)
+
+- `OPENROUTER_API_KEY` - OpenRouter API key for AI flashcard generation (get from https://openrouter.ai/keys)
+
 ### Optional
 
 - `DEBUG_AUTH` - Set to `"true"` to enable authentication debug logging

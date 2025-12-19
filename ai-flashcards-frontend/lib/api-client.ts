@@ -673,3 +673,68 @@ export async function updateCardStatus(
     throw networkError;
   }
 }
+
+/**
+ * Creates multiple cards in bulk for a specific folder.
+ * @param accessToken - The JWT access token from Keycloak
+ * @param folderId - The ID of the folder
+ * @param cards - Array of card objects with question and answer
+ * @returns Array of created card data from the backend
+ * @throws {ApiError} If the request fails with a non-2xx status
+ */
+export async function createBulkCards(
+  accessToken: string,
+  folderId: number,
+  cards: Array<{ question: string; answer: string }>
+): Promise<CardDto[]> {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}/api/folders/${folderId}/cards/bulk`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ cards }),
+      }
+    );
+
+    if (!response.ok) {
+      const error: ApiError = {
+        message: `Failed to create cards: ${response.statusText}`,
+        status: response.status,
+      };
+
+      // Handle specific error cases
+      if (response.status === 401) {
+        error.message = "Authentication failed. Please sign in again.";
+      } else if (response.status === 404) {
+        error.message = "Folder not found.";
+      } else if (response.status === 400) {
+        error.message = "Invalid card data. Please check your input.";
+      } else if (response.status >= 500) {
+        error.message = "Server error. Please try again later.";
+      }
+
+      throw error;
+    }
+
+    const cardData: CardDto[] = await response.json();
+    return cardData;
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error && typeof error === "object" && "message" in error) {
+      throw error;
+    }
+
+    // Handle network errors
+    const networkError: ApiError = {
+      message:
+        error instanceof Error
+          ? `Network error: ${error.message}`
+          : "Network error: Failed to connect to backend",
+    };
+    throw networkError;
+  }
+}

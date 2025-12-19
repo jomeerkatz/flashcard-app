@@ -1,11 +1,14 @@
 package jomeerkatz.project.ai_flashcards.services;
 
+import jomeerkatz.project.ai_flashcards.domain.BulkCardCreateRequest;
 import jomeerkatz.project.ai_flashcards.domain.CardCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.User;
 import jomeerkatz.project.ai_flashcards.domain.enums.CardStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface CardService {
     Page<Card> getAllCards(User user, Long folderId, Pageable pageable);
@@ -15,4 +18,5 @@ public interface CardService {
     Long getCountOfCardsByFoldeId(User user, Long folderId);
     Page<Card> getCardsByStatus(User user, Long folderId, CardStatus status, Pageable pageable);
     void updatedCardStatus(User user, Long folderId, Long cardId, CardStatus status);
+    List<Card> createCardsFromAi(User user, Long folderId, BulkCardCreateRequest bulkCardCreateRequest);
 }
