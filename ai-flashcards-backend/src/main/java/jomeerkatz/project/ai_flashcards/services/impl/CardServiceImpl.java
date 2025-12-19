@@ -1,5 +1,6 @@
 package jomeerkatz.project.ai_flashcards.services.impl;
 
+import jakarta.transaction.Transactional;
 import jomeerkatz.project.ai_flashcards.domain.CardCreateUpdateRequest;
 import jomeerkatz.project.ai_flashcards.domain.entities.Card;
 import jomeerkatz.project.ai_flashcards.domain.entities.Folder;
@@ -48,6 +49,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Transactional
     public Card createCard(User user, Long folderId, CardCreateUpdateRequest cardCreateUpdateRequest) {
         // request comes to backend
         // we have to check, if the user is even existing bec without a user, we cant save it
@@ -78,6 +80,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Transactional
     public void updateCard(User user, Long folderId, CardCreateUpdateRequest card, Long cardId) {
         // request comes to backend
         // we have to check, if the user is even existing bec without a user, we cant save it
@@ -104,6 +107,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Transactional
     public void deleteCard(User user, Long folderId, Long cardId) {
         // request comes to backend
         // we have to check, if the user is even existing bec without a user, we cant save it
@@ -123,6 +127,27 @@ public class CardServiceImpl implements CardService {
             Optional<Card> savedCard = cardRepository.findByIdAndFolderId(cardId, savedFolder.getId());
             Card toBeDeleted = savedCard.orElseThrow(() -> new CardException("Card not existing or user has no access."));
             cardRepository.deleteById(toBeDeleted.getId());
+        }
+    }
+
+    @Override
+    public Long getCountOfCardsByFoldeId(User user, Long folderId) {
+        // request comes to backend
+        // we have to check, if the user is even existing bec without a user, we cant save it
+        User savedUser = userService.getUserOrThrow(user);
+
+        // if user exists, we have to check if the folder is existing too also
+        Folder savedFolder = folderRepository.findById(folderId).orElseThrow(
+                () -> new FolderDoesNotExists("Folder does not exists!")
+        );
+        // if folder is connected to user (user has access to the folder) - prevent random user create cards for folders
+        // if user exists, if folder exists, if user has access to folder...
+        boolean userHasAccessToFolder = folderRepository.existsByUserIdAndName(savedUser.getId(), savedFolder.getName());
+
+        if (!userHasAccessToFolder) {
+            throw new FolderAccessDeniedException("User has not access to the folder!");
+        } else {
+            return cardRepository.countByFolderId(savedFolder.getId());
         }
     }
 }

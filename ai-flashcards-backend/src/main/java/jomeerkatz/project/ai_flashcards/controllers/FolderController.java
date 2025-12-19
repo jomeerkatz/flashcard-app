@@ -23,6 +23,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +66,22 @@ public class FolderController {
         User user = JwtMapper.toUser(jwt);
         folderService.updateFolder(user, folderId, folderMapper.toFolderCreateUpdateRequest(folderCreateUpdateRequestDto));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{folderId}")
+    public ResponseEntity<Void> deleteFolder(@AuthenticationPrincipal Jwt jwt,
+                                             @PathVariable(name = "folderId") Long folderId
+                                             ) {
+        User user = JwtMapper.toUser(jwt);
+        folderService.deleteFolder(user, folderId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/{folderId}/cards/count")
+    public ResponseEntity<Long> getCountOfCardsOfSpecificFolder(@AuthenticationPrincipal Jwt jwt,
+                                                                @PathVariable(name = "folderId") Long folderId) {
+        User user = JwtMapper.toUser(jwt);
+        return ResponseEntity.ok(cardService.getCountOfCardsByFoldeId(user, folderId));
     }
 
     @PostMapping(path = "/{folderId}/cards")

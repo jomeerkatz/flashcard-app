@@ -11,4 +11,5 @@ public interface CardService {
     Card createCard(User user, Long folderId, CardCreateUpdateRequest card);
     void updateCard(User user, Long folderId, CardCreateUpdateRequest card, Long cardId);
     void deleteCard(User user, Long folderId, Long cardId);
+    Long getCountOfCardsByFoldeId(User user, Long folderId);
 }

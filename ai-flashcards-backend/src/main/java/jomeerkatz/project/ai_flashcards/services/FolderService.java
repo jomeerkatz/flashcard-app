@@ -10,4 +10,5 @@ public interface FolderService {
     Folder saveFolder(User user, FolderCreateUpdateRequest folderCreateUpdateRequest);
     Page<Folder> getAllFolders(User user, Pageable pageable);
     void updateFolder(User user, Long folderId, FolderCreateUpdateRequest folderCreateUpdateRequest);
+    void deleteFolder(User user, Long folderId);
 }
