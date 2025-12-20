@@ -1,4 +1,5 @@
-# AI Flashcards - Intelligent Spaced Repetition Learning System
+# AI Flashcards - Intelligent Difficulty-Based Learning System
+
 
 > A full-stack flashcard learning application inspired by Anki, featuring AI-powered card generation and an intelligent three-tier difficulty system. Built with modern Java Spring Boot backend and Next.js frontend.
 
