@@ -3,12 +3,12 @@
     <module name="ai_flashcards" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="jomeerkatz.project.ai_flashcards.controllers.*" />
+        <option name="PATTERN" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="PACKAGE_NAME" value="jomeerkatz.project.ai_flashcards.controllerLayer" />
-    <option name="MAIN_CLASS_NAME" value="jomeerkatz.project.ai_flashcards.controllerLayer.UserControllerJUnitTests" />
+    <option name="PACKAGE_NAME" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests" />
+    <option name="MAIN_CLASS_NAME" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests.UserControllerJUnitTests" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <envs>
