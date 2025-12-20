@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ErrorControllerTests" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+    <module name="ai_flashcards" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests" />
+    <option name="MAIN_CLASS_NAME" value="jomeerkatz.project.ai_flashcards.controllerIntegrationTests.ErrorControllerTests" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <envs>
+      <env name="DB_PASSWORD" value="flashcards" />
+      <env name="DB_URL" value="jdbc:postgresql://localhost:5432/flashcards" />
+      <env name="DB_USERNAME" value="flashcards" />
+      <env name="JWT_ISSUER_URI" value="http://localhost:9090/realms/flashcards-app" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
