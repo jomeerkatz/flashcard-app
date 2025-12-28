@@ -11,7 +11,7 @@
 
 ## 📹 Demo Video
 
-**[▶️ Watch the Full Application Demo Here](#)** *(Video Placeholder - Upload your demo video and replace this link)*
+**[▶️ Watch the Full Application Demo Here:](#)** https://youtu.be/MfSa72uZPMQ
 
 ---
 
